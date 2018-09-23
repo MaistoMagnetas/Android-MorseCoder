@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="lovedice.cactustree.pc.morsecode.MainActivity">
+
+    <EditText
+        android:id="@+id/morse_text_input"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 "
+        android:maxLength="500"
+        android:layout_weight="0.4"
+        android:hint="@string/input_your_text"
+        android:padding="20dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/morse_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Text" />
+
+        <Button
+            android:id="@+id/morse_button_vibration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vibration" />
+
+        <Button
+            android:id="@+id/morse_button_light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Light" />
+
+        <Button
+            android:id="@+id/morse_button_sound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sound" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/morse_button_switch"
+            android:src="@drawable/ic_launcher_background"
+            android:layout_width="35dp"
+            android:layout_height="35dp" />
+
+        <Button
+            android:id="@+id/morse_button_dot"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="•" />
+
+        <Button
+            android:id="@+id/morse_button_dash"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="-" />
+
+        <Button
+            android:id="@+id/morse_button_space"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text=" " />
+
+        <Button
+            android:id="@+id/morse_button_wordend"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="/" />
+    </LinearLayout>
+
+
+    <EditText
+        android:id="@+id/morse_text_output"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:inputType="none"
+        android:layout_weight="0.4"
+        android:hint="@string/input_your_text" />
+
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111">
+    </com.google.android.gms.ads.AdView>
+
+</LinearLayout>

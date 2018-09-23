@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Morse Code Decryptor</string>
-    <string name="input_your_text">Input your text</string>
+    <string name="input_your_text">Alphabetic text input/output</string>
+    <string name ="morse_output">Morse code input/output</string>
 </resources>

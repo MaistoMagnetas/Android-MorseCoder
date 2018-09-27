@@ -186,6 +186,4 @@ class MainMorseConverter {
         }
         return returningMorseLetter;
     }
-
-
 }

@@ -11,77 +11,103 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 /**
  * Main class for adding all XML and action.
  */
 public class MainActivity extends AppCompatActivity {
 
+    private AdView mAdView;
     private EditText morseCodeInput, morseCodeOutput;
     private Button btnToText, btnToLight, btnToVibration, btnToSound;
     private Button btnMorseSpace, btnMorseDot, btnMorseDash, btnMorseWordEnd, btnMorseDel;
     private CheckBox btnMorseSwitchMode;
-    private boolean isMorseModeEnabled = false;
 
+    private boolean isMorseModeEnabled = false;
     private VibrationMorse vibrationMorse;
-    private String inputString;
+
+    private MorseToTextConverter morseToTextConverter;
+
+    private String inputStringTextToMorse, inputStringMorseToText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        loadAndDisplayBannerAd();
         initXMLItems();
-        changeStatusOfButtons(isMorseModeEnabled); //Disable buttons on app load
+//        changeStatusOfButtons(isMorseModeEnabled); //Disable buttons on app load
 
         btnToText.setOnClickListener(new View.OnClickListener() { //Morse to text
             @Override
             public void onClick(View v) {
-                inputString = morseCodeInput.getText().toString().toLowerCase();
-                if (isStringValid(inputString)) {
-                    changeTextAfterInput();
-                    hideKeyboardThenClickedOnButton();
-                }
-            }
-        });
-
-        btnToVibration.setOnClickListener(new View.OnClickListener() { //Vibration morse
-            @Override
-            public void onClick(View v) {
-                inputString = morseCodeInput.getText().toString().toLowerCase();
-                if (isStringValid(inputString)) {
-                    changeTextAfterInput();
-                    hideKeyboardThenClickedOnButton();
-                    try {
-                        vibrationMorse = new VibrationMorse(inputString);
-                        long[] patternForVibrating = vibrationMorse.getPatternForVibrating();
-                        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                        if (vibrator != null) {
-                            vibrator.vibrate(patternForVibrating, -1);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                if (isMorseModeEnabled) {
+                    inputStringMorseToText = morseCodeOutput.getText().toString().toLowerCase();
+                    morseToTextConverter = new MorseToTextConverter(inputStringMorseToText);
+                    String convertedString = morseToTextConverter.getConvertedString();
+                    if (isStringValid(convertedString)) {
+                        TextMorse textMorse = new TextMorse(inputStringTextToMorse);
+                        morseCodeInput.setText(textMorse.getConvertedText());
+                        hideKeyboardThenClickedOnButton();
+                    }
+                } else {
+                    inputStringTextToMorse = morseCodeInput.getText().toString().toLowerCase();
+                    if (isStringValid(inputStringTextToMorse)) {
+                        changeTextAfterInput();
+                        hideKeyboardThenClickedOnButton();
                     }
                 }
 
             }
         });
 
+        btnToVibration.setOnClickListener(new View.OnClickListener() { //Vibration morse
+            @Override
+            public void onClick(View v) {
+                if (isMorseModeEnabled) {
+
+                } else {
+                    inputStringTextToMorse = morseCodeInput.getText().toString().toLowerCase();
+                    if (isStringValid(inputStringTextToMorse)) {
+                        changeTextAfterInput();
+                        hideKeyboardThenClickedOnButton();
+                        try {
+                            vibrationMorse = new VibrationMorse(inputStringTextToMorse);
+                            long[] patternForVibrating = vibrationMorse.getPatternForVibrating();
+                            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                            if (vibrator != null) {
+                                vibrator.vibrate(patternForVibrating, -1);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+
         btnToLight.setOnClickListener(new View.OnClickListener() { //Light morse
             @Override
             public void onClick(View v) {
-                inputString = morseCodeInput.getText().toString().toLowerCase();
-                if (isStringValid(inputString)) {
-                    changeTextAfterInput();
-                    hideKeyboardThenClickedOnButton();
-                    if (deviceHasCameraFlash()) {
-                        try {
-                            new FlashMorse(inputString);
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            generateAllertMessage();
+                if (isMorseModeEnabled) {
+
+                } else {
+                    inputStringTextToMorse = morseCodeInput.getText().toString().toLowerCase();
+                    if (isStringValid(inputStringTextToMorse)) {
+                        changeTextAfterInput();
+                        hideKeyboardThenClickedOnButton();
+                        if (deviceHasCameraFlash()) {
+                            try {
+                                new FlashMorse(inputStringTextToMorse);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                generateAllertMessage();
+                            }
                         }
                     }
                 }
@@ -91,67 +117,68 @@ public class MainActivity extends AppCompatActivity {
         btnToSound.setOnClickListener(new View.OnClickListener() { //Sound Morse
             @Override
             public void onClick(View v) {
-                inputString = morseCodeInput.getText().toString().toLowerCase();
-                if (isStringValid(inputString)) {
-                    changeTextAfterInput();
-                    hideKeyboardThenClickedOnButton();
-                    new SoundMorse(inputString);
+                if (isMorseModeEnabled) {
+
+                } else {
+                    inputStringTextToMorse = morseCodeInput.getText().toString().toLowerCase();
+                    if (isStringValid(inputStringTextToMorse)) {
+                        changeTextAfterInput();
+                        hideKeyboardThenClickedOnButton();
+                        new SoundMorse(inputStringTextToMorse);
+                    }
                 }
             }
         });
 
-        btnMorseDash.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setTextOnMorseButtonClick("-");
-            }
-        });
-
-        btnMorseDot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setTextOnMorseButtonClick("•");
-
-            }
-        });
-
-        btnMorseSpace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setTextOnMorseButtonClick(" ");
-
-            }
-        });
-
-        btnMorseWordEnd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setTextOnMorseButtonClick("/");
-
-            }
-        });
-
-        btnMorseSwitchMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                changeStatusOfMode();
-                clearTextsOnModeChanged();
-                changeStatusOfButtons(isMorseModeEnabled);
-
-            }
-        });
-
-        btnMorseDel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String stringBefore = morseCodeOutput.getText().toString();
-                int stringSize = stringBefore.length();
-                if (stringSize > 0) {
-                    morseCodeOutput.setText(stringBefore.substring(0, stringBefore.length() - 1));
-                }
-            }
-        });
+//        btnMorseDash.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                setTextOnMorseButtonClick("-");
+//            }
+//        });
+//
+//        btnMorseDot.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                setTextOnMorseButtonClick("•");
+//            }
+//        });
+//
+//        btnMorseSpace.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                setTextOnMorseButtonClick(" ");
+//            }
+//        });
+//
+//        btnMorseWordEnd.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                setTextOnMorseButtonClick("/");
+//            }
+//        });
+//
+//        btnMorseSwitchMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                changeStatusOfMode();
+//                clearTextsOnModeChanged();
+//                changeStatusOfButtons(isMorseModeEnabled);
+//            }
+//        });
+//
+//        btnMorseDel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String stringBefore = morseCodeOutput.getText().toString();
+//                int stringSize = stringBefore.length();
+//                if (stringSize > 0) {
+//                    morseCodeOutput.setText(stringBefore.substring(0, stringBefore.length() - 1));
+//                }
+//            }
+//        });
     }
+
 
     /**
      * Changes status of morse or text input
@@ -163,14 +190,14 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Clears input/ output text fields data after mode changed.
      */
-    private void clearTextsOnModeChanged()
-    {
+    private void clearTextsOnModeChanged() {
         morseCodeOutput.setText("");
         morseCodeInput.setText("");
     }
 
     /**
      * Enables buttons if morse mode is turned on
+     *
      * @param status status to enable or dissable buttons.
      */
     private void changeStatusOfButtons(boolean status) {
@@ -193,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Sets text to morse input text area.
+     *
      * @param type type => dot, dash, space etc.
      */
     private void setTextOnMorseButtonClick(String type) {
@@ -210,12 +238,12 @@ public class MainActivity extends AppCompatActivity {
         btnToVibration = findViewById(R.id.morse_button_vibration);
         morseCodeOutput.setInputType(InputType.TYPE_NULL);
         //Morse
-        btnMorseDash = findViewById(R.id.morse_button_dash);
-        btnMorseDot = findViewById(R.id.morse_button_dot);
-        btnMorseSpace = findViewById(R.id.morse_button_space);
-        btnMorseWordEnd = findViewById(R.id.morse_button_wordend);
-        btnMorseDel = findViewById(R.id.morse_button_remove);
-        btnMorseSwitchMode = findViewById(R.id.morse_button_switchmode);
+//        btnMorseDash = findViewById(R.id.morse_button_dash);
+//        btnMorseDot = findViewById(R.id.morse_button_dot);
+//        btnMorseSpace = findViewById(R.id.morse_button_space);
+//        btnMorseWordEnd = findViewById(R.id.morse_button_wordend);
+//        btnMorseDel = findViewById(R.id.morse_button_remove);
+//        btnMorseSwitchMode = findViewById(R.id.morse_button_switchmode);
     }
 
     private boolean isStringNotEmpty(String inputString) {
@@ -247,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
      * Changes text field output after any button click.
      */
     private void changeTextAfterInput() {
-        TextMorse textMorse = new TextMorse(inputString);
+        TextMorse textMorse = new TextMorse(inputStringTextToMorse);
         String convertedString = textMorse.getConvertedText();
         morseCodeOutput.setText(convertedString);
     }
@@ -275,4 +303,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean deviceHasCameraFlash() {
         return getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
+
+    //ADS methods
+    private void loadAndDisplayBannerAd() {
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
 }
